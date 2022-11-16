@@ -7,7 +7,7 @@ REVIEW_URL = "https://www.breakingbourbon.com/review/seelbachs-private-reserve-s
 
 def main():
     page = requests.get(REVIEW_URL)
-    soup = BeautifulSoup(page.content, 'html.parser')
+    soup = BeautifulSoup(page.content, "html.parser")
     print(soup.prettify())
     # print(soup.find_all(class_="w-dyn-list"))
 
