@@ -15,7 +15,8 @@ def click_load_more(browser: webdriver, click_counter: int = 0):
     while True:
         try:
             load_more_button = browser.find_element(
-                By.XPATH, value="//*[@aria-label='Next Page' and not(ancestor::*[contains(@style, 'display: none')])]"
+                By.XPATH,
+                value="//*[@aria-label='Next Page' and not(ancestor::*[contains(@style, 'display: none')]) and ancestor::*[contains(@class, 'w--tab-active')]]",
             )
             load_more_button.click()
             click_counter += 1
@@ -42,17 +43,20 @@ def get_bb_review_list(url: str):
     # click through each review level
     review_buttons = browser.find_elements(By.CLASS_NAME, value="barrel-rating-button")
     for idx, button in enumerate(review_buttons):
-        time.sleep(1)
         button.click()
-        time.sleep(1)
 
         click_counter = click_load_more(browser, click_counter)
+
+        # second element is list, first is rating button
         level = browser.find_element(
             By.XPATH,
-            value=f"//*[contains(@data-w-tab, 'Tab {idx+1}')]",
+            value=f"//*[@data-w-tab='Tab {idx+1}' and contains(@class, 'w-tab-pane')]",
         )
         time.sleep(1)
-        reviews = level.find_elements(By.XPATH, value=f"//child::*[contains(@class, 'link-block') and contains(@href, 'review/') and ancestor::*[contains(@class,'w--tab-active')]]")
+        reviews = level.find_elements(
+            By.XPATH,
+            value=f".//child::a[contains(@class, 'w-inline-block') and contains(@href, 'review/') and child::*[contains(@style, 'background')]]",
+        )
         for review in reviews:
             review_levels.append((review.get_attribute("href"), rating_levels[idx]))
 
@@ -64,7 +68,7 @@ def get_bb_review_list(url: str):
 def main():
     reviews = get_bb_review_list(HOMEPAGE_URL)
     review_url_df = pd.DataFrame(reviews)
-    print(review_url_df)
+    print(len(review_url_df.index))
 
 
 if __name__ == "__main__":
