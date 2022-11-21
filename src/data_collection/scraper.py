@@ -1,7 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
+from pathlib import Path
 import pandas as pd
 import re
+from image_scraper import retrieve_image_from_page
 
 
 REVIEW_URL = "https://www.breakingbourbon.com/review/seelbachs-private-reserve-straight-bourbon-finished-in-triple-sec-and-sparkling-wine-barrels"
@@ -28,6 +30,7 @@ class BBData:
         palate = re.findall(r'palate<\/div>.*?<p>(.*?)<\/p>', page_text, flags=re.IGNORECASE)
         finish = re.findall(r'finish<\/div>.*?<p>(.*?)<\/p>', page_text, flags=re.IGNORECASE)
         overall = re.findall(r'overall<\/div>.*?<p>(.*?)<\/p>', page_text, flags=re.IGNORECASE)
+        image_filename = retrieve_image_from_page(review_url, Path("data/images"), download=True)
 
         self.data = {
             'title': title,
@@ -44,7 +47,8 @@ class BBData:
             'nose': nose,
             'palate': palate,
             'finish': finish,
-            'overall': overall
+            'overall': overall,
+            'image_filename': image_filename
         }
 
 
@@ -56,7 +60,8 @@ def main():
         print(D.data)
         out.append(D.data)
 
-    out_df = pd.DataFrame(out).to_csv("data/review_data.csv")
+    out_df = pd.DataFrame(out)
+    out_df.to_csv("data/review_data.csv")
 
 
 if __name__ == "__main__":
